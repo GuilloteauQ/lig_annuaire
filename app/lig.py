@@ -58,6 +58,8 @@ def get_result(nom):
 
 def get_data(text):
     soup = BeautifulSoup(text, "html.parser")
+    if soup.find_all(text = "Aucune personne ne correspond aux critères de recherche") is None:
+        return None
     return soup.find("div", {"class": "fiche_membre"})
 
 
@@ -71,8 +73,11 @@ def main():
     nom = ' '.join(args[1:])
 
     soup = get_data(get_result(nom))
-    me = Person(soup)
-    print(me)
+    if soup is None:
+        print("No result for '{}'".format(nom))
+    else:
+        me = Person(soup)
+        print(me)
     return 0
 
 if __name__ == "__main__":
