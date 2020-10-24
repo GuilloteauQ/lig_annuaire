@@ -43,23 +43,20 @@ class Person:
                     return
         self.bureau = ""
 
-    def __str__(self):
-        data_to_print = [[self.name, self.equipe, self.email, self.bureau, self.location]]
-        return str(tabulate(data_to_print, headers = ["Name", "Team", "Email", "Office", "Location"]))
-        # return "{} ({}): {} -> {} ({})".format(self.name, self.equipe, self.email, self.bureau, self.location)
+    def data_to_print(self):
+        return [[self.name, self.equipe, self.email, self.bureau, self.location]]
 
 
-def get_result(nom):
-    myobj = {'nom': nom, 'prenom': '', 'rechercher': 'Rechercher', 'form_build_id': 'form-JX5EjuCiVMGS2PhzYD5Mf2UiNGVidpmsko0tCeAAkJ4', 'form_id': 'lig_ose_annuaire_form'}
+def tabulate_print(data_to_print):
+    print(tabulate(data_to_print, headers = ["Name", "Team", "Email", "Office", "Location"]))
 
+def get_result(nom, prenom=''):
+    myobj = {'nom': nom, 'prenom': prenom, 'rechercher': 'Rechercher', 'form_build_id': 'form-JX5EjuCiVMGS2PhzYD5Mf2UiNGVidpmsko0tCeAAkJ4', 'form_id': 'lig_ose_annuaire_form'}
     x = requests.post(URL, data = myobj)
-
     return x.text
 
 def get_data(text):
     soup = BeautifulSoup(text, "html.parser")
-    if soup.find_all(text = "Aucune personne ne correspond aux critères de recherche") is None:
-        return None
     return soup.find("div", {"class": "fiche_membre"})
 
 
@@ -72,12 +69,28 @@ def main():
 
     nom = ' '.join(args[1:])
 
-    soup = get_data(get_result(nom))
+    text = get_result(nom)
+    soup = BeautifulSoup(text, "html.parser")
+
+    # We look for multiple results
+    even_names = [person_tr.find_all('td')[1].text for person_tr in soup.find_all("tr", {"class": "even"})]
+    odd_names = [person_tr.find_all('td')[1].text for person_tr in soup.find_all("tr", {"class": "odd"})]
+    all_names = even_names + odd_names
+    # If there are some
+    if len(all_names) > 0:
+        to_print = [ ]
+        for first_name in all_names:
+            to_print += Person(get_data(get_result(nom, first_name))).data_to_print()
+        tabulate_print(to_print)
+        return 0
+
+    soup = soup.find("div", {"class": "fiche_membre"})
+    # If there are no result
     if soup is None:
         print("No result for '{}'".format(nom))
     else:
         me = Person(soup)
-        print(me)
+        tabulate_print(me.data_to_print())
     return 0
 
 if __name__ == "__main__":
