@@ -5,12 +5,7 @@ from tabulate import tabulate
 from bs4 import BeautifulSoup
 
 
-url = "https://www.tutorialspoint.com/index.htm"
-req = requests.get(url)
 URL="http://www.liglab.fr/fr/util/annuaire"
-
-
-
 
 class Person:
     def __init__(self, soup):
