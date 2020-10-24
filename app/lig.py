@@ -49,8 +49,8 @@ class Person:
         # return "{} ({}): {} -> {} ({})".format(self.name, self.equipe, self.email, self.bureau, self.location)
 
 
-def get_result(nom, prenom):
-    myobj = {'nom': nom, 'prenom': prenom, 'rechercher': 'Rechercher', 'form_build_id': 'form-JX5EjuCiVMGS2PhzYD5Mf2UiNGVidpmsko0tCeAAkJ4', 'form_id': 'lig_ose_annuaire_form'}
+def get_result(nom):
+    myobj = {'nom': nom, 'prenom': '', 'rechercher': 'Rechercher', 'form_build_id': 'form-JX5EjuCiVMGS2PhzYD5Mf2UiNGVidpmsko0tCeAAkJ4', 'form_id': 'lig_ose_annuaire_form'}
 
     x = requests.post(URL, data = myobj)
 
@@ -63,18 +63,14 @@ def get_data(text):
 
 def main():
     args = sys.argv
-    if len(args) <= 1 or len(args) > 3:
-        print("Usage: lig [LAST_NAME] [FIRST_NAME]")
+    if len(args) <= 1:
+        print("Usage: lig LAST_NAME")
         return 1
 
-    nom = str(args[1])
-    if len(args) == 3:
-        prenom = str(args[2])
-    else:
-        prenom = "*"
 
+    nom = ' '.join(args[1:])
 
-    soup = get_data(get_result(nom, prenom))
+    soup = get_data(get_result(nom))
     me = Person(soup)
     print(me)
     return 0
